@@ -4,6 +4,17 @@ AngularJS module for working with treetables using [jquery-treetable](http://lud
 
 ## Usage
 
+### Dependencies
+
+```html
+<script src="jquery.treetable.js"></script> <!-- See http://plugins.jquery.com/treetable/ -->
+<link rel="stylesheet" type="text/css" href="jquery.treetable.css" />
+<link rel="stylesheet" type="text/css" href="jquery.treetable.theme.default.css" /> <!-- You'll probably want to change this -->
+
+<script src="angular.min.js"></script>
+
+<script src="angular-treetable.min.js"></script>
+```
 
 ### Define a template
 
