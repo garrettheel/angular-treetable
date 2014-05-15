@@ -21,13 +21,12 @@ AngularJS module for working with treetables using [jquery-treetable](http://lud
 Define an angular template for rendering your node. Use the `tt-node` directive on the `tr` with the following options:
 
 * `is-branch` - Can this node be expanded (does it have children)? Optional, default=true.
-* `parent` - Used for placing nodes under the correct parent. This is already set in the scope as `parent`, so just pass it along.
 
 You'll also have the `node` variable in the context with your data returned from the `nodes` function below.
 
 ```html
 <script type="text/ng-template" id="tree_node">
-    <tr tt-node is-branch="node.type == 'folder'" parent="parent">
+    <tr tt-node is-branch="node.type == 'folder'">
         <td><span ng-bind="node.name"></span></td>
         <td ng-bind="node.type"></td>
         <td ng-bind="node.size"></td>

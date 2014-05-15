@@ -17,7 +17,7 @@ angular.module('ngTreetable', [])
                     var template = $templateCache.get(tpl);
                     var template_scope = scope.$parent.$new();
                     template_scope.node = node;
-                    template_scope.parent = parentId;
+                    template_scope._ttParent = parentId;
                     return $compile(template)(template_scope);
                 }
 
@@ -79,10 +79,14 @@ angular.module('ngTreetable', [])
                 parent: '='
             },
             link: function(scope, element, attrs) {
-                var branch = angular.isDefined(scope.isBranch) ? scope.isBranch: true;
+                var branch = angular.isDefined(scope.isBranch) ? scope.isBranch : true;
+
+                // Look for a parent set by the tt-tree directive if one isn't explicitly set
+                var parent = angular.isDefined(scope.parent) ? scope.parent : scope.$parent._ttParent;
+
                 element.attr('data-tt-id', ttNodeCounter++);
                 element.attr('data-tt-branch', branch);
-                element.attr('data-tt-parent-id', scope.parent);
+                element.attr('data-tt-parent-id', parent);
             }
         }
 
