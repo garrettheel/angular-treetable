@@ -21,7 +21,7 @@
     <h3>Dynamic File Browser</h3>
 
     <script type="text/ng-template" id="tree_node">
-        <tr tt-node is-branch="node.type == 'folder'">
+        <tr tt-node is-branch="node.type == 'folder'" parent="parent">
             <td><span ng-bind="node.name"></span></td>
             <td ng-bind="node.type"></td>
             <td ng-bind="node.size"></td>
