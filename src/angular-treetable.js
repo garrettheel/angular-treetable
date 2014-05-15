@@ -2,7 +2,7 @@
 
 angular.module('ngTreetable', [])
 
-    .directive('ttTable', ['$compile', '$templateCache', '$timeout', function($compile, $templateCache, $timeout) {
+    .directive('ttTable', ['$compile', '$templateCache', function($compile, $templateCache) {
         return {
             restrict: 'EAC',
             scope: {
@@ -15,7 +15,7 @@ angular.module('ngTreetable', [])
                 function compileElement(node, parentId) {
                     var tpl = angular.isFunction(scope.template) ? scope.template(node) : scope.template;
                     var template = $templateCache.get(tpl);
-                    var template_scope = scope.$new(true);
+                    var template_scope = scope.$parent.$new();
                     template_scope.node = node;
                     template_scope.parent = parentId;
                     return $compile(template)(template_scope);
