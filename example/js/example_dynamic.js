@@ -28,4 +28,10 @@ app.controller('ExampleCtrl', ['$scope', '$q' ,function($scope, $q) {
         return deferred.promise;
     }
 
+    $scope.treetableOptions = {
+        onNodeExpand: function() {
+            console.log('A node was expanded!');
+        }
+    }
+
 }]);

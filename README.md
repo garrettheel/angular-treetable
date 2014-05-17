@@ -20,7 +20,7 @@ AngularJS module for working with treetables using [jquery-treetable](http://lud
 
 Define an angular template for rendering your node. Use the `tt-node` directive on the `tr` with the following options:
 
-* `is-branch` - Can this node be expanded (does it have children)? Optional, default=true.
+* `is-branch` - Can this node be expanded (does it have children)? Optional, default=`true`.
 
 You'll also have the `node` variable in the context with your data returned from the `nodes` function below.
 
@@ -38,9 +38,9 @@ You'll also have the `node` variable in the context with your data returned from
 
 Add a `tt-table` directive to your table element, with the following options:
 
-* `nodes` - a `function` which takes an optional parent and returns a `promise` for an array of the children of that parent. This will initially be called with `null` to generate the root of the tree and then again every time a node is expanded.
+* `nodes` - a `function` which takes an optional parent and returns a `promise` for an array of the children of that parent. This will initially be called with `null` to generate the root of the tree and then once again every time a node is expanded.
 * `template` - either a `string` or a `function` which returns the template to use for rendering nodes. If a function, the node will be given as an argument.
-* `after-init` - an optional `function` to be called after the table has finished loading the root nodes.
+* `options` = options for the treetable, see [jQuery Treetable Configuration](http://ludo.cubicphuse.nl/jquery-treetable/#configuration)
 
 ```html
 <table tt-table nodes="get_nodes" template="'tree_node'" after-init="after">

@@ -4,6 +4,8 @@ angular.module('ngTreetable', [])
 
     .controller('TreetableController', ['$scope', '$element', '$compile', '$templateCache', function($scope, $element, $compile, $templateCache) {
 
+        var table = $element;
+
         $scope.compileElement = function(node, parentId) {
             var tpl = angular.isFunction($scope.template) ? $scope.template(node) : $scope.template;
             var template = $templateCache.get(tpl);
@@ -28,7 +30,7 @@ angular.module('ngTreetable', [])
                     newElements.push(row.get(0));
                 });
 
-                var parentTtNode = parentId != null ? $element.treetable("node", parentId) : null;
+                var parentTtNode = parentId != null ? table.treetable("node", parentId) : null;
                 $element.treetable('loadBranch', parentTtNode, newElements);
 
                 if (parentElement) parentElement.scope().loading = false;
@@ -41,33 +43,46 @@ angular.module('ngTreetable', [])
 
         $scope.onNodeExpand = function() {
             if (this.row.scope().loading) return; // make sure we're not already loading
-            $element.treetable('unloadBranch', this); // make sure we don't double-load
+            table.treetable('unloadBranch', this); // make sure we don't double-load
             $scope.addChildren(this.row);
         }
 
         $scope.onNodeCollapse = function() {
             if (this.row.scope().loading) return; // make sure we're not already loading
-            $element.treetable('unloadBranch', this);
+            table.treetable('unloadBranch', this);
         }
 
-        $element.treetable({
+        $scope.treetableOptions = angular.extend({
             expandable: true,
             onNodeExpand: $scope.onNodeExpand,
             onNodeCollapse: $scope.onNodeCollapse
-        });
+        }, $scope.options);
+
+        if ($scope.options) {
+            // Inject event handlers before custom ones
+            angular.forEach(['onNodeCollapse', 'onNodeExpand'], function(event) {
+                if ($scope.options[event]) {
+                    $scope.treetableOptions[event] = function() {
+                        $scope[event].apply(this, arguments);
+                        $scope.options[event].apply(this, arguments);
+                    }
+                }
+            });
+        }
+
+        table.treetable($scope.treetableOptions);
 
         $scope.addChildren(null);
-
 
     }])
 
     .directive('ttTable', [function() {
         return {
-            restrict: 'EAC',
+            restrict: 'AC',
             scope: {
                 template: '=',
                 nodes: '=',
-                afterInit: '='
+                options: '='
             },
             controller: 'TreetableController'
         }
@@ -76,7 +91,7 @@ angular.module('ngTreetable', [])
     .directive('ttNode', [function() {
         var ttNodeCounter = 0;
         return {
-            restrict: 'EAC',
+            restrict: 'AC',
             scope: {
                 isBranch: '=',
                 parent: '='
