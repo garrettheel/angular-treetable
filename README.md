@@ -43,7 +43,7 @@ Add a `tt-table` directive to your table element, with the following options:
 * `options` = options for the treetable, see [jQuery Treetable Configuration](http://ludo.cubicphuse.nl/jquery-treetable/#configuration)
 
 ```html
-<table tt-table nodes="get_nodes" template="'tree_node'" after-init="after">
+<table tt-table nodes="get_nodes" template="'tree_node'">
     <thead>
         <tr>
             <th>Filename</th>
