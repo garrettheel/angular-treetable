@@ -37,7 +37,7 @@ angular.module('ngTreetable', [])
                     if (['getNodes', 'getTemplate', 'options'].indexOf(key) > -1) {
                         self[key] = val;
                     } else {
-                        $log.warn('Ignoring unexpected property "' + key + '" in ngTreetableParams.')
+                        $log.warn('Ignoring unexpected property "' + key + '" in ngTreetableParams.');
                     }
                 });
             }
@@ -106,26 +106,37 @@ angular.module('ngTreetable', [])
             table.treetable('unloadBranch', this);
         }
 
-        $scope.treetableOptions = angular.extend({
-            expandable: true,
-            onNodeExpand: $scope.onNodeExpand,
-            onNodeCollapse: $scope.onNodeCollapse
-        }, params.options);
-
-        if (params.options) {
-            // Inject required event handlers before custom ones
-            angular.forEach(['onNodeCollapse', 'onNodeExpand'], function(event) {
-                if (params.options[event]) {
-                    $scope.treetableOptions[event] = function() {
-                        $scope[event].apply(this, arguments);
-                        params.options[event].apply(this, arguments);
-                    }
-                }
+        $scope.refresh = function() {
+            $scope.configureOptions();
+            angular.forEach(table.data('treetable').roots, function(rootNode) {
+               table.treetable('removeNode', rootNode.id);
             });
+            $scope.addChildren(null);
+        }
+        params.refresh = $scope.refresh;
+
+        $scope.configureOptions = function() {
+            $scope.treetableOptions = angular.extend({
+                expandable: true,
+                onNodeExpand: $scope.onNodeExpand,
+                onNodeCollapse: $scope.onNodeCollapse
+            }, params.options);
+
+            if (params.options) {
+                // Inject required event handlers before custom ones
+                angular.forEach(['onNodeCollapse', 'onNodeExpand'], function(event) {
+                    if (params.options[event]) {
+                        $scope.treetableOptions[event] = function() {
+                            $scope[event].apply(this, arguments);
+                            params.options[event].apply(this, arguments);
+                        }
+                    }
+                });
+            }
         }
 
+        $scope.configureOptions();
         table.treetable($scope.treetableOptions);
-
         $scope.addChildren(null);
 
     }])

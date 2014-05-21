@@ -1,1 +1,0 @@
-* Allow full table to be refreshed
