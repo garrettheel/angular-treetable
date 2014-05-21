@@ -1,6 +1,6 @@
 var app = angular.module('example', ['ngTreetable']);
 
-app.controller('ExampleCtrl', function($scope, $q, treetableParams) {
+app.controller('ExampleCtrl', function($scope, $q, ngTreetableParams) {
 
     var data = [
         {
@@ -22,7 +22,7 @@ app.controller('ExampleCtrl', function($scope, $q, treetableParams) {
         }
     ];
 
-    $scope.params = new treetableParams({
+    $scope.params = new ngTreetableParams({
         getNodes: function(parent) {
             return parent ? parent.children : data;
         },

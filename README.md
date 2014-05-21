@@ -18,15 +18,15 @@ AngularJS module for working with treetables using [jquery-treetable](http://lud
 
 ### Configuration
 
-Create a `treetableParams` object containing your configuration. Applicable keys are:
+Create an `ngTreetableParams` object containing your configuration. Applicable keys are:
 
 * `getNodes(parent)` - a `function` which takes a parent (or `null` for the root) and returns an array of the children of that parent. May also return a `promise` resolving to the children.
 * `getTemplate(node)` - a `function` which returns the path to a template to use for rendering a single node. 
 * `options` - options for the underlying treetable, see [jQuery Treetable Configuration](http://ludo.cubicphuse.nl/jquery-treetable/#configuration)
 
 ```js
-app.controller('MyController', function($scope, treetableParams) {
-    $scope.params = new treetableParams({
+app.controller('MyController', function($scope, ngTreetableParams) {
+    $scope.params = new ngTreetableParams({
         getNodes: function(parent) {
             return [{name: 'foo', value: 'bar'}];
         },
@@ -113,7 +113,7 @@ var tableData = [
     }
 ];
 
-$scope.params = new treetableParams({
+$scope.params = new ngTreetableParams({
     getNodes: function(parent) {
         return parent ? parent.children : data;
     },
@@ -125,7 +125,7 @@ $scope.params = new treetableParams({
 You can also return a promise from `getNodes`. This is useful when you need to fetch data externally, like from `$http`. For example:
 
 ```js
-$scope.params = new treetableParams({
+$scope.params = new ngTreetableParams({
     getNodes: function(parent) {
         var deferred = $q.defer();
         $http.get('/get-nodes').success(function(data) {

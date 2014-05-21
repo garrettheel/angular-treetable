@@ -5,7 +5,7 @@ angular.module('ngTreetable', [])
     /**
      * @ngdoc service
      */
-    .factory('treetableParams', ['$log', function($log) {
+    .factory('ngTreetableParams', ['$log', function($log) {
         var params = function(baseConfiguration) {
             var self = this;
 
@@ -37,7 +37,7 @@ angular.module('ngTreetable', [])
                     if (['getNodes', 'getTemplate', 'options'].indexOf(key) > -1) {
                         self[key] = val;
                     } else {
-                        $log.warn('Ignoring unexpected property "' + key + '" in treetableParams.')
+                        $log.warn('Ignoring unexpected property "' + key + '" in ngTreetableParams.')
                     }
                 });
             }
