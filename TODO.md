@@ -1,2 +1,2 @@
-* Allow treetable options to be passed in, chain event functions
 * Allow templates via HTTP
+* Allow full table to be refreshed, maybe similar to ngTable approach
