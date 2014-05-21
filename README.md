@@ -22,7 +22,7 @@ Create a `treetableParams` object containing your configuration. Applicable keys
 
 * `getNodes(parent)` - a `function` which takes a parent (or `null` for the root) and returns an array of the children of that parent. May also return a `promise` resolving to the children.
 * `getTemplate(node)` - a `function` which returns the path to a template to use for rendering a single node. 
-* `options` = options for the underlying treetable, see [jQuery Treetable Configuration](http://ludo.cubicphuse.nl/jquery-treetable/#configuration)
+* `options` - options for the underlying treetable, see [jQuery Treetable Configuration](http://ludo.cubicphuse.nl/jquery-treetable/#configuration)
 
 ```js
 app.controller('MyController', function($scope, treetableParams) {
@@ -31,7 +31,7 @@ app.controller('MyController', function($scope, treetableParams) {
             return [{name: 'foo', value: 'bar'}];
         },
         getTemplate: function(node) {
-            return 'TreeNode';
+            return 'TreeNode.html';
         },
         options: {
             onNodeExpand: function() {
@@ -44,7 +44,7 @@ app.controller('MyController', function($scope, treetableParams) {
 
 ### Define node template(s)
 
-Use the `tt-node` directive in your templates to define your table row. You can provide an `is-branch` attribute to indicate whether
+Use the `tt-node` directive in your templates to define your table row. The optional `is-branch` attribute indicates whether
 the branch can be expanded.
 
 You can define your template on the same page as the table:
