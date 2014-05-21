@@ -2,17 +2,69 @@
 
 angular.module('ngTreetable', [])
 
-    .controller('TreetableController', ['$scope', '$element', '$compile', '$templateCache', function($scope, $element, $compile, $templateCache) {
+    /**
+     * @ngdoc service
+     */
+    .factory('treetableParams', ['$log', function($log) {
+        var params = function(baseConfiguration) {
+            var self = this;
 
+            /**
+             * @ngdoc method
+             * @param {<any>} parent A parent node to fetch children of, or null if fetching root nodes.
+             */
+            this.getNodes = function(parent) {}
+
+            /**
+             * @ngdoc method
+             * @param {<any>} node A node returned from getNodes
+             */
+            this.getTemplate = function(node) {}
+
+            /**
+             * @ngdoc property
+             */
+            this.options = {};
+
+            /**
+             * @ngdoc method
+             */
+            this.refresh = function() {}
+
+
+            if (angular.isObject(baseConfiguration)) {
+                angular.forEach(baseConfiguration, function(val, key) {
+                    if (['getNodes', 'getTemplate', 'options'].indexOf(key) > -1) {
+                        self[key] = val;
+                    } else {
+                        $log.warn('Ignoring unexpected property "' + key + '" in treetableParams.')
+                    }
+                });
+            }
+
+        }
+        return params;
+    }])
+
+    .controller('TreetableController', ['$scope', '$element', '$compile', '$templateCache', '$q', '$http', function($scope, $element, $compile, $templateCache, $q, $http) {
+
+        var params = $scope.ttParams;
         var table = $element;
 
         $scope.compileElement = function(node, parentId) {
-            var tpl = angular.isFunction($scope.template) ? $scope.template(node) : $scope.template;
-            var template = $templateCache.get(tpl);
-            var template_scope = $scope.$parent.$new();
-            template_scope.node = node;
-            template_scope._ttParent = parentId;
-            return $compile(template)(template_scope);
+            var tpl = params.getTemplate(node);
+
+            var templatePromise = $http.get(params.getTemplate(node), {cache: $templateCache}).then(function(result) {
+                return result.data;
+            });
+
+            return templatePromise.then(function(template) {
+                var template_scope = $scope.$parent.$new();
+                template_scope.node = node;
+                template_scope._ttParent = parentId;
+                return $compile(template)(template_scope);
+            })
+
         }
 
         $scope.addChildren = function(parentElement) {
@@ -23,21 +75,23 @@ angular.module('ngTreetable', [])
                 parentElement.scope().loading = true;
             }
 
-            $scope.nodes(parentNode).then(function(data) {
+            $q.when(params.getNodes(parentNode)).then(function(data) {
                 var newElements = [];
+                var elementPromises = [];
                 angular.forEach(data, function(node) {
-                    var row = $scope.compileElement(node, parentId);
-                    newElements.push(row.get(0));
+                    var rowPromise = $scope.compileElement(node, parentId).then(function(row) {
+                        newElements.push(row.get(0));
+                    });
+                    elementPromises.push(rowPromise);
                 });
 
-                var parentTtNode = parentId != null ? table.treetable("node", parentId) : null;
-                $element.treetable('loadBranch', parentTtNode, newElements);
+                $q.all(elementPromises).then(function() {
+                    var parentTtNode = parentId != null ? table.treetable("node", parentId) : null;
+                    $element.treetable('loadBranch', parentTtNode, newElements);
 
-                if (parentElement) parentElement.scope().loading = false;
+                    if (parentElement) parentElement.scope().loading = false;
+                });
 
-                if (parentElement == null && angular.isFunction($scope.afterInit)) {
-                    $scope.afterInit();
-                }
             });
         }
 
@@ -56,15 +110,15 @@ angular.module('ngTreetable', [])
             expandable: true,
             onNodeExpand: $scope.onNodeExpand,
             onNodeCollapse: $scope.onNodeCollapse
-        }, $scope.options);
+        }, params.options);
 
-        if ($scope.options) {
-            // Inject event handlers before custom ones
+        if (params.options) {
+            // Inject required event handlers before custom ones
             angular.forEach(['onNodeCollapse', 'onNodeExpand'], function(event) {
-                if ($scope.options[event]) {
+                if (params.options[event]) {
                     $scope.treetableOptions[event] = function() {
                         $scope[event].apply(this, arguments);
-                        $scope.options[event].apply(this, arguments);
+                        params.options[event].apply(this, arguments);
                     }
                 }
             });
@@ -80,9 +134,7 @@ angular.module('ngTreetable', [])
         return {
             restrict: 'AC',
             scope: {
-                template: '=',
-                nodes: '=',
-                options: '='
+                ttParams: '='
             },
             controller: 'TreetableController'
         }

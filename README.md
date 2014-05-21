@@ -16,49 +16,81 @@ AngularJS module for working with treetables using [jquery-treetable](http://lud
 <script src="angular-treetable.min.js"></script>
 ```
 
-### Define a template
+### Configuration
 
-Define an angular template for rendering your node. Use the `tt-node` directive on the `tr` with the following options:
+Create a `treetableParams` object containing your configuration. Applicable keys are:
 
-* `is-branch` - Can this node be expanded (does it have children)? Optional, default=`true`.
+* `getNodes(parent)` - a `function` which takes a parent (or `null` for the root) and returns an array of the children of that parent. May also return a `promise` resolving to the children.
+* `getTemplate(node)` - a `function` which returns the path to a template to use for rendering a single node. 
+* `options` = options for the underlying treetable, see [jQuery Treetable Configuration](http://ludo.cubicphuse.nl/jquery-treetable/#configuration)
 
-You'll also have the `node` variable in the context with your data returned from the `nodes` function below.
+```js
+app.controller('MyController', function($scope, treetableParams) {
+    $scope.params = new treetableParams({
+        getNodes: function(parent) {
+            return [{name: 'foo', value: 'bar'}];
+        },
+        getTemplate: function(node) {
+            return 'TreeNode';
+        },
+        options: {
+            onNodeExpand: function() {
+                console.log('A node was expanded!');
+            }
+        }
+    });
+}
+```
+
+### Define node template(s)
+
+Use the `tt-node` directive in your templates to define your table row. You can provide an `is-branch` attribute to indicate whether
+the branch can be expanded.
+
+You can define your template on the same page as the table:
 
 ```html
-<script type="text/ng-template" id="tree_node">
-    <tr tt-node is-branch="node.type == 'folder'">
+<script type="text/ng-template" id="TreeNode.html">
+    <tr tt-node is-branch="node.name == 'foo'">
         <td><span ng-bind="node.name"></span></td>
         <td ng-bind="node.type"></td>
-        <td ng-bind="node.size"></td>
     </tr>
 </script>
 ```
 
+or in a separate file to be loaded over an HTTP call:
+```html
+<!-- TreeNode.html -->
+<tr tt-node is-branch="node.name == 'foo'">
+    <td><span ng-bind="node.name"></span></td>
+    <td ng-bind="node.type"></td>
+</tr>
+```
+
+Note: Be wary of doing an `ng-bind` to the first `td` in your template, as this causes issues with jquery-treetable's indentation.
+
+
 ### Create the table
 
-Add a `tt-table` directive to your table element, with the following options:
-
-* `nodes` - a `function` which takes an optional parent and returns a `promise` for an array of the children of that parent. This will initially be called with `null` to generate the root of the tree and then once again every time a node is expanded.
-* `template` - either a `string` or a `function` which returns the template to use for rendering nodes. If a function, the node will be given as an argument.
-* `options` = options for the treetable, see [jQuery Treetable Configuration](http://ludo.cubicphuse.nl/jquery-treetable/#configuration)
+Add a `tt-table` directive to your table element and pass in the parameters via `tt-params`.
 
 ```html
-<table tt-table nodes="get_nodes" template="'tree_node'">
+<table tt-table tt-params="params">
     <thead>
         <tr>
-            <th>Filename</th>
-            <th>Type</th>
-            <th>Size</th>
+            <th>Name</th>
+            <th>Value</th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
 ```
 
-#### Example for generating nodes
+## Examples
 
-Here's a simple example for the `nodes` function. Note that since we're using a promise for the return value, you could also
-do things like make an HTTP call to fetch the data from an external location.
+### Generating nodes
+
+Here's a really simple example for the `getNodes` function, which returns data directly from the scope. 
 
 ```javascript
 var tableData = [
@@ -81,15 +113,31 @@ var tableData = [
     }
 ];
 
-$scope.get_nodes = function(parent) {
-    var deferred = $q.defer();
-    deferred.resolve(parent ? parent.children : tableData);
-    return deferred.promise;
-}
+$scope.params = new treetableParams({
+    getNodes: function(parent) {
+        return parent ? parent.children : data;
+    },
+    // ...
+});
 
 ```
 
+You can also return a promise from `getNodes`. This is useful when you need to fetch data externally, like from `$http`. For example:
 
-## More
+```js
+$scope.params = new treetableParams({
+    getNodes: function(parent) {
+        var deferred = $q.defer();
+        $http.get('/get-nodes').success(function(data) {
+            deferred.resolve(data);
+        });
+        return deferred.promise;
+    },
+    // ...
+});
+```
 
-See the `example` folder for more information.
+
+### More
+
+See the `example` folder to learn more.

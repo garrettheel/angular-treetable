@@ -1,8 +1,8 @@
 var app = angular.module('example', ['ngTreetable']);
 
-app.controller('ExampleCtrl', ['$scope', '$q' ,function($scope, $q) {
+app.controller('ExampleCtrl', function($scope, $q, treetableParams) {
 
-    var tableData = [
+    var data = [
         {
             name: 'Some Folder',
             type: 'folder',
@@ -22,16 +22,18 @@ app.controller('ExampleCtrl', ['$scope', '$q' ,function($scope, $q) {
         }
     ];
 
-    $scope.get_nodes = function(parent) {
-        var deferred = $q.defer();
-        deferred.resolve(parent ? parent.children : tableData);
-        return deferred.promise;
-    }
-
-    $scope.treetableOptions = {
-        onNodeExpand: function() {
-            console.log('A node was expanded!');
+    $scope.params = new treetableParams({
+        getNodes: function(parent) {
+            return parent ? parent.children : data;
+        },
+        getTemplate: function(node) {
+            return 'tree_node';
+        },
+        options: {
+            onNodeExpand: function() {
+                console.log('A node was expanded!');
+            }
         }
-    }
+    });
 
-}]);
+});
