@@ -51,7 +51,7 @@ angular.module('ngTreetable', [])
         var params = $scope.ttParams;
         var table = $element;
 
-        $scope.compileElement = function(node, parentId) {
+        $scope.compileElement = function(node, parentId, parentNode) {
             var tpl = params.getTemplate(node);
 
             var templatePromise = $http.get(params.getTemplate(node), {cache: $templateCache}).then(function(result) {
@@ -60,8 +60,11 @@ angular.module('ngTreetable', [])
 
             return templatePromise.then(function(template) {
                 var template_scope = $scope.$parent.$new();
-                template_scope.node = node;
-                template_scope._ttParent = parentId;
+                angular.extend(template_scope, {
+                    node: node,
+                    parentNode: parentNode
+                });
+                template_scope._ttParentId = parentId;
                 return $compile(template)(template_scope);
             })
 
@@ -79,7 +82,7 @@ angular.module('ngTreetable', [])
                 var newElements = [];
                 var elementPromises = [];
                 angular.forEach(data, function(node) {
-                    var rowPromise = $scope.compileElement(node, parentId).then(function(row) {
+                    var rowPromise = $scope.compileElement(node, parentId, parentNode).then(function(row) {
                         newElements.push(row.get(0));
                     });
                     elementPromises.push(rowPromise);
@@ -108,9 +111,11 @@ angular.module('ngTreetable', [])
 
         $scope.refresh = function() {
             $scope.configureOptions();
-            angular.forEach(table.data('treetable').roots, function(rootNode) {
-               table.treetable('removeNode', rootNode.id);
-            });
+
+            var rootNodes = table.data('treetable').nodes;
+            while (rootNodes.length > 0) {
+                table.treetable('removeNode', rootNodes[0].id);
+            }
             $scope.addChildren(null);
         }
         params.refresh = $scope.refresh;
@@ -163,7 +168,7 @@ angular.module('ngTreetable', [])
                 var branch = angular.isDefined(scope.isBranch) ? scope.isBranch : true;
 
                 // Look for a parent set by the tt-tree directive if one isn't explicitly set
-                var parent = angular.isDefined(scope.parent) ? scope.parent : scope.$parent._ttParent;
+                var parent = angular.isDefined(scope.parent) ? scope.parent : scope.$parent._ttParentId;
 
                 element.attr('data-tt-id', ttNodeCounter++);
                 element.attr('data-tt-branch', branch);
