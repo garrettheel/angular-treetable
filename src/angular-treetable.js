@@ -110,8 +110,6 @@ angular.module('ngTreetable', [])
         }
 
         $scope.refresh = function() {
-            $scope.configureOptions();
-
             var rootNodes = table.data('treetable').nodes;
             while (rootNodes.length > 0) {
                 table.treetable('removeNode', rootNodes[0].id);
@@ -120,8 +118,8 @@ angular.module('ngTreetable', [])
         }
         params.refresh = $scope.refresh;
 
-        $scope.configureOptions = function() {
-            $scope.treetableOptions = angular.extend({
+        $scope.getOptions = function() {
+            var opts = angular.extend({
                 expandable: true,
                 onNodeExpand: $scope.onNodeExpand,
                 onNodeCollapse: $scope.onNodeCollapse
@@ -131,17 +129,19 @@ angular.module('ngTreetable', [])
                 // Inject required event handlers before custom ones
                 angular.forEach(['onNodeCollapse', 'onNodeExpand'], function(event) {
                     if (params.options[event]) {
-                        $scope.treetableOptions[event] = function() {
+                        opts[event] = function() {
                             $scope[event].apply(this, arguments);
                             params.options[event].apply(this, arguments);
                         }
                     }
                 });
             }
+
+            return opts;
         }
 
-        $scope.configureOptions();
-        table.treetable($scope.treetableOptions);
+
+        table.treetable($scope.getOptions());
         $scope.addChildren(null);
 
     }])
