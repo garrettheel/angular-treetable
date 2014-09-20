@@ -13,12 +13,10 @@
 
     <script src="../src/angular-treetable.js"></script>
 
-    <script src="js/example_dynamic.js"></script>
+    <script src="js/example.js"></script>
 
 </head>
 <body ng-controller="ExampleCtrl">
-
-    <h3>Dynamic File Browser</h3>
 
     <script type="text/ng-template" id="tree_node">
         <tr tt-node is-branch="node.type == 'folder'">
@@ -28,13 +26,28 @@
         </tr>
     </script>
 
-    <table id="table" tt-table tt-params="params">
+    <h3>Basic File Browser</h3>
+
+    <table tt-table tt-params="dynamic_params">
         <thead>
             <tr>
                 <th>Filename</th>
                 <th>Type</th>
                 <th>Size</th>
             </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3>Variant - Expanded</h3>
+
+    <table tt-table tt-params="expanded_params">
+        <thead>
+        <tr>
+            <th>Filename</th>
+            <th>Type</th>
+            <th>Size</th>
+        </tr>
         </thead>
         <tbody></tbody>
     </table>

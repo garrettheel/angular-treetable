@@ -131,6 +131,19 @@ describe('Angular Treetable', function() {
 
         }));
 
+        it("should fully expand the table when initialState is 'expanded'", function() {
+            simpleParams.options = {initialState: 'expanded'};
+            simpleParams.getNodes = function(parent) {
+                return parent ? ['child'] : ['parent'];
+            }
+
+            createCtrl(simpleParams);
+            rootScope.$digest();
+
+            expect(table.find('td').length).toBe(2);
+
+        });
+
     });
 
 

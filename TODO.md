@@ -1,1 +1,0 @@
-* Allow expanding all nodes initially

@@ -22,7 +22,7 @@ app.controller('ExampleCtrl', function($scope, $q, ngTreetableParams) {
         }
     ];
 
-    $scope.params = new ngTreetableParams({
+    $scope.dynamic_params = new ngTreetableParams({
         getNodes: function(parent) {
             return parent ? parent.children : data;
         },
@@ -33,6 +33,18 @@ app.controller('ExampleCtrl', function($scope, $q, ngTreetableParams) {
             onNodeExpand: function() {
                 console.log('A node was expanded!');
             }
+        }
+    });
+
+    $scope.expanded_params = new ngTreetableParams({
+        getNodes: function(parent) {
+            return parent ? parent.children : data;
+        },
+        getTemplate: function(node) {
+            return 'tree_node';
+        },
+        options: {
+            initialState: 'expanded'
         }
     });
 

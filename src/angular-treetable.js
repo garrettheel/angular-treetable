@@ -1,4 +1,5 @@
-'use strict';
+(function() {
+"use strict";
 
 angular.module('ngTreetable', [])
 
@@ -70,7 +71,12 @@ angular.module('ngTreetable', [])
 
         }
 
-        $scope.addChildren = function(parentElement) {
+        /**
+         * Expands the given node.
+         * @param parentElement the parent node element, or null for the root
+         * @param shouldExpand whether or not all descendants of `parentElement` should also be expanded
+         */
+        $scope.addChildren = function(parentElement, shouldExpand) {
             var parentNode = parentElement ? parentElement.scope().node : null;
             var parentId = parentElement ? parentElement.data('ttId') : null;
 
@@ -92,6 +98,12 @@ angular.module('ngTreetable', [])
                     var parentTtNode = parentId != null ? table.treetable("node", parentId) : null;
                     $element.treetable('loadBranch', parentTtNode, newElements);
 
+                    if (shouldExpand) {
+                        angular.forEach(newElements, function(el) {
+                            $scope.addChildren($(el), shouldExpand);
+                        });
+                    }
+
                     if (parentElement) parentElement.scope().loading = false;
                 });
 
@@ -101,7 +113,7 @@ angular.module('ngTreetable', [])
         $scope.onNodeExpand = function() {
             if (this.row.scope().loading) return; // make sure we're not already loading
             table.treetable('unloadBranch', this); // make sure we don't double-load
-            $scope.addChildren(this.row);
+            $scope.addChildren(this.row, false);
         }
 
         $scope.onNodeCollapse = function() {
@@ -109,12 +121,12 @@ angular.module('ngTreetable', [])
             table.treetable('unloadBranch', this);
         }
 
-        $scope.refresh = function() {
+        $scope.refresh = function(shouldExpand) {
             var rootNodes = table.data('treetable').nodes;
             while (rootNodes.length > 0) {
                 table.treetable('removeNode', rootNodes[0].id);
             }
-            $scope.addChildren(null);
+            $scope.addChildren(null, shouldExpand);
         }
         params.refresh = $scope.refresh;
 
@@ -140,9 +152,9 @@ angular.module('ngTreetable', [])
             return opts;
         }
 
-
-        table.treetable($scope.getOptions());
-        $scope.addChildren(null);
+        var options = $scope.getOptions();
+        table.treetable(options);
+        $scope.addChildren(null, options.initialState === 'expanded');
 
     }])
 
@@ -177,3 +189,5 @@ angular.module('ngTreetable', [])
         }
 
     }]);
+
+})();
