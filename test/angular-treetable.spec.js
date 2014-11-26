@@ -134,7 +134,7 @@ describe('Angular Treetable', function() {
         it("should fully expand the table when initialState is 'expanded'", function() {
             simpleParams.options = {initialState: 'expanded'};
             simpleParams.getNodes = function(parent) {
-                return parent ? ['child'] : ['parent'];
+                return parent == 'child' ? [] : (parent ? ['child'] : ['parent']);
             }
 
             createCtrl(simpleParams);
