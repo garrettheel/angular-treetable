@@ -42,7 +42,7 @@ app.controller('MyController', function($scope, ngTreetableParams) {
 }
 ```
 
-Note that you can also call `refresh()` on the `ngTreetableParams` instance to rebuild the table if anything changes.
+Note that you can also call `refresh()` on the `ngTreetableParams` instance to rebuild the entire table.
 
 ### Define node template(s)
 

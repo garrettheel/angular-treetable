@@ -1,7 +1,7 @@
 {
   "name": "angular-treetable",
   "description": "Angular Treetable",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "http://github.com/garrettheel/angular-treetable",
   "author": {
     "name": "Garrett Heel",
@@ -14,7 +14,7 @@
     }
   ],
   "dependencies": {
-    "angular": "~1.2.10"
+    "angular": ">= 1.2.0"
   },
   "devDependencies": {
     "grunt": "~0.4.5",

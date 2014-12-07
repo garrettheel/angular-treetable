@@ -38,7 +38,7 @@ angular.module('ngTreetable', [])
                     if (['getNodes', 'getTemplate', 'options'].indexOf(key) > -1) {
                         self[key] = val;
                     } else {
-                        $log.warn('Ignoring unexpected property "' + key + '" in ngTreetableParams.');
+                        $log.warn('ngTreetableParams - Ignoring unexpected property "' + key + '".');
                     }
                 });
             }
@@ -66,7 +66,7 @@ angular.module('ngTreetable', [])
                     parentNode: parentNode
                 });
                 template_scope._ttParentId = parentId;
-                return $compile(template)(template_scope);
+                return $compile(template)(template_scope).get(0);
             })
 
         }
@@ -74,7 +74,7 @@ angular.module('ngTreetable', [])
         /**
          * Expands the given node.
          * @param parentElement the parent node element, or null for the root
-         * @param shouldExpand whether or not all descendants of `parentElement` should also be expanded
+         * @param shouldExpand whether all descendants of `parentElement` should also be expanded
          */
         $scope.addChildren = function(parentElement, shouldExpand) {
             var parentNode = parentElement ? parentElement.scope().node : null;
@@ -85,17 +85,14 @@ angular.module('ngTreetable', [])
             }
 
             $q.when(params.getNodes(parentNode)).then(function(data) {
-                var newElements = [];
                 var elementPromises = [];
                 angular.forEach(data, function(node) {
-                    var rowPromise = $scope.compileElement(node, parentId, parentNode).then(function(row) {
-                        newElements.push(row.get(0));
-                    });
-                    elementPromises.push(rowPromise);
+                    elementPromises.push($scope.compileElement(node, parentId, parentNode));
                 });
 
-                $q.all(elementPromises).then(function() {
+                $q.all(elementPromises).then(function(newElements) {
                     var parentTtNode = parentId != null ? table.treetable("node", parentId) : null;
+
                     $element.treetable('loadBranch', parentTtNode, newElements);
 
                     if (shouldExpand) {
@@ -104,32 +101,49 @@ angular.module('ngTreetable', [])
                         });
                     }
 
-                    if (parentElement) parentElement.scope().loading = false;
+                    if (parentElement) {
+                        parentElement.scope().loading = false;
+                    }
                 });
 
             });
         }
 
+        /**
+         * Callback for onNodeExpand to add nodes.
+         */
         $scope.onNodeExpand = function() {
             if (this.row.scope().loading) return; // make sure we're not already loading
             table.treetable('unloadBranch', this); // make sure we don't double-load
-            $scope.addChildren(this.row, false);
+            $scope.addChildren(this.row, $scope.shouldExpand());
         }
 
+        /**
+         * Callback for onNodeCollapse to remove nodes.
+         */
         $scope.onNodeCollapse = function() {
             if (this.row.scope().loading) return; // make sure we're not already loading
             table.treetable('unloadBranch', this);
         }
 
-        $scope.refresh = function(shouldExpand) {
+        /**
+         * Rebuilds the entire table.
+         */
+        $scope.refresh = function() {
             var rootNodes = table.data('treetable').nodes;
             while (rootNodes.length > 0) {
                 table.treetable('removeNode', rootNodes[0].id);
             }
-            $scope.addChildren(null, shouldExpand);
+            $scope.addChildren(null, $scope.shouldExpand());
         }
+
+        // attach to params for convenience
         params.refresh = $scope.refresh;
 
+
+        /**
+         * Build options for the internal treetable library.
+         */
         $scope.getOptions = function() {
             var opts = angular.extend({
                 expandable: true,
@@ -152,9 +166,13 @@ angular.module('ngTreetable', [])
             return opts;
         }
 
-        var options = $scope.getOptions();
-        table.treetable(options);
-        $scope.addChildren(null, options.initialState === 'expanded');
+        $scope.shouldExpand = function() {
+            return $scope.options.initialState === 'expanded';
+        }
+
+        $scope.options = $scope.getOptions();
+        table.treetable($scope.options);
+        $scope.addChildren(null, $scope.shouldExpand());
 
     }])
 
